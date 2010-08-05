@@ -1,0 +1,18 @@
+mimicDB 
+
+(C) Daniel Nilsson, 2009-2010
+
+Package released under the Perl Artistic License.
+
+
+Most programs in the package have some level of documentation embedded
+as Plain Old Documentation. You can view this with e.g. perldoc or
+convert them to the format of your choice using pod2html, pod2man etc.
+
+ perldoc INSTALL
+ perldoc bin/fill_db.sh
+ perldoc interface/MimicDB.pm 
+
+Please refer to the INSTALL guide for installation instructions,
+bin/fill_db.sh for more instructions and interface/MimicDB.pm for
+details on the web interface.
