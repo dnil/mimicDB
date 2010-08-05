@@ -1,0 +1,127 @@
+#!/usr/bin/perldoc
+
+=head1 NAME
+
+mimicDB installation guide
+
+=head1 AUTHOR
+
+Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nilsson@gmail.com
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2009, 2010 held by Daniel Nilsson. The package is realesed for use under the Perl Artistic License.
+
+=head1 Database setup
+
+=head2 Install an SQL server. 
+
+I'd suggest installing the mysql server, as the go termdb is best
+developed for this. See documentation for you own operating system, or
+L<http://www.mysql.com/dbownloads/mysql/>. A sample gentoo install:
+
+ emerge dev-db/mysql
+ emerge --config =dev-db/mysql-5.0.90-r2 
+ rc-update add mysql default
+ 
+Ensure it is currently running:
+
+ /etc/init.d/mysql start
+
+=head2 Download the GO database and install it.
+
+See L<http://www.geneontology.org/GO.downloads.database.shtml> for
+details and picking your favourite method.
+
+For downloading a mysql GO-db something along the lines of 
+
+ wget http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz
+
+works well at the moment. The README in the very same latest-termdb
+directory will tell you how to proced. For the impatient:
+
+ tar zxvf go_daily-termdb-tables.gz
+ cd go_daily-termdb-tables
+ echo "create database mygo default charset latin1" | mysql -u root -h localhost -p
+ cat *.sql | mysql -u root -h localhost -p mygo
+ mysqlimport -L mygo -u root -h localhost -p *.txt
+
+You will also need assocdb, found in the latest-lite direcory of the same server.
+
+ http://archive.geneontology.org/latest-lite/
+
+e.g. 
+
+ go_20100731-assocdb-tables.tar.gz
+ 
+ tar zxvf go_20100731-assocdb-tables.tar.gz
+ cd go_20100731-assocdb-tables
+ mysqlimport -L mygo -u root -h localhost -p *.txt
+ 
+The termdb from the same release can be useful if something has gone
+wrong with the daily termdb dump. Actually, we would hardly use any
+terms that are newer than the bi-weekly dumps, so using the archived
+datestamped release for termdb is really the best course of action.
+
+The go-dev tools package does provide scripts to install the go db
+from scratch. To me, the dumps seemed more straightforward, but your
+mileage may vary.
+
+=head2 Add mimicDB specific tables and a less privileged user for access 
+
+ cat db/mimicDB.sql | mysql -u root -h localhost -p mygo
+
+This creates a few new tables in the mygo database, as well as a less
+priviledged database user "mygo" to control access to the GO term
+database, and one completely unpriviledged "mygoweb" for access from 
+the web interface.
+
+=head1 Tools for data generation
+
+=head2 Setup Philipp Ludin's mimicry pipeline
+
+Setup Philipp Ludin's mimicry pipeline to run on your species of
+interest, or obtain readymade *-final-files for your species.
+
+(Philipp, perhaps we should merge these packages?)
+
+=head2 hmmer
+
+Obtain
+hmmer and a copy of the pfam database to make additional protein motif
+annotations. Download hmmer, install and get a copy of the pfam database. 
+
+NOTE: the current hmmer results parsing script is for hmmer2. This is
+on the todo-list, but in the meantime, please use hmmer2 and a
+compatible version of pfam. Sorry. I love hmmer3, and would like to
+see this issue solved, or will fix it myself upon opportunity.
+
+=head2 Phobius
+
+Obtain Phobius to run additional protein signal peptide and topology predictions.
+
+=head1 Configure mimicDB
+
+=head2 Tune the C<fill_db.sh> pipeline
+
+Please see the fill_db.sh documentation on how to set environment variables to reflect the location of your installation. E.g.
+
+ perldoc bin/fill_db.sh
+
+=head1 Visualisation
+
+To visualise the results you will also need a web server setup.
+
+=head2 Web server backend
+
+Install a web server (package tested with Apache). 
+
+=head2 Titanium libraries
+
+Install the perl Titanium package.
+
+=head2 mimicDB interface
+
+Copy the web interface files from the interface directory to wherever you want them within your web s erver document tree.
+
+=cut

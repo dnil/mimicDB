@@ -1,0 +1,114 @@
+table {
+    border-spacing: 0px;
+}
+
+body {
+    font-family: arial,sans-serif;
+    font-size: 11pt;
+}
+
+span.micDB {
+    color: #e04020;
+    font-family: arial,sans-serif;
+    font-weight: bold;
+    font-size: 24pt;
+    text-decoration: none
+}
+
+span.mi {
+    color: #a04040;
+    font-family: arial,sans-serif;
+    font-weight: bold;
+    font-size: 24pt;
+    text-decoration: none
+}
+
+span.version {
+    color: black;
+    font-family: arial,sans-serif;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 12pt;
+}
+
+.sequence {
+    font-family: courier,monospace;
+}
+
+span.seqhitmotif {
+    font-family: courier,monospace;
+    background-color: #f0f0c0;
+    color: #a04040;
+    font-weight: bold;
+}
+
+span.seqhit {
+    font-family: courier,monospace;
+#    color: #e04020;
+    color: #a04040;
+    font-weight: bold;
+}
+
+span.seqmotif {
+    font-family: courier,monospace;
+    background-color: #f0f0c0;
+    color: black;
+}
+
+td.odd {
+    background-color: #cfcff0;
+    border-style: hidden;
+    padding: 1px;
+    font-family: arial,sans-serif;
+    color: black
+}
+
+td.even {
+    background-color: #b0c0e0; 
+    border-style: hidden;
+    padding: 1px;
+    font-family: arial,sans-serif;
+    color: black
+}
+
+th.odd {
+    background-color: #f0f0c0;
+    border-style: hidden;
+    padding: 1px;
+    font-family: arial,sans-serif;
+    font-weight: bold;
+    color: black
+}
+
+th.even {
+    background-color: #f0f0a0; 
+    border-style: hidden;
+    padding: 1px;
+    font-family: arial,sans-serif;
+    font-weight: bold;
+    color: black
+}
+
+a:link {
+    font-color: #4040f0;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #6060f0;
+    text-decoration: none;
+}
+
+a:link.linkout {
+    color: #4040f0;
+    text-decoration: none;
+    font-size: small;
+    text-align: center;
+}
+
+a:visted.linkout {
+    color: #6060f0;
+    text-decoration: none;
+    font-size: small;
+    text-align: center;
+}

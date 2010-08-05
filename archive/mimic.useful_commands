@@ -1,0 +1,13 @@
+
+create table mimic_sequence ( id integer AUTO_INCREMENT not null PRIMARY KEY, species_id integer, foreign key (species_id) references species(id), name varchar(255) not null, description varchar(255), UNIQUE (species_id, name) );
+
+create table mimic_sequence_with_go_association ( mimic_sequence_id integer, foreign key(mimic_sequence_id) references mimic_sequence(id), gene_product_id integer, foreign key(gene_product_id) references gene_product(id) );
+
+create table mimic_hit ( id integer AUTO_INCREMENT not null PRIMARY KEY, query_id integer, foreign key (query_id) references mimic_sequence(id), query_start integer, query_end integer, subject_id integer, foreign key (subject_id) references mimic_sequence(id), subject_start integer, subject_end integer, score decimal, identities integer );
+
+select distinct gene_product.* from gene_product inner join dbxref on (dbxref.id = gene_product.dbxref_id) inner join association on (association.gene_product_id=gene_product.id) where dbxref.xref_key = 'Q5VYK3';
+
+create table mimic_sequence_seq ( id integer AUTO_INCREMENT not null PRIMARY KEY, mimic_sequence_id integer, foreign key (mimic_sequence_id) references mimic_sequence(id), seq_len integer, seq text ); Query OK, 0 rows affected (0.10 sec)
+
+create table mimic_sequence_motif ( id integer AUTO_INCREMENT not null PRIMARY KEY, mimic_sequence_id integer, foreign key (mimic_sequence_id) references mimic_sequence(id), seq_start integer, seq_end integer, type varchar(8), eval float, score float, identifier varchar(55), description varchar(128) );
+
