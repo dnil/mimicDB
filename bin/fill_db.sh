@@ -21,23 +21,26 @@ Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nils
 
 Copyright 2009, 2010 held by Daniel Nilsson. The package is realesed for use under the Perl Artistic License.
 
+=head1 DESCRIPTION
+
+Populates the mimicDB mysql database from mimicry csv table form data.
+On the filtered hit sequences, fill_db.sh will run hmmer against PFAM,
+and Phobius, and uploads the results.
+
 =head1 SYNOPSIS
 
 USAGE: C<fill_db.sh>
 
-See README and HOWTO for more instructions.
+See README and INSTALL for more instructions. Briefly an initial setup
+workflow would be as follows.
 
-Briefly a setup workflow would be as follows:
+You will want a database backend:
 
 =over 4
 
 =item * 
 
-Run Philipp Ludin's mimicry pipeline on your species of interest
-
-=item * 
-
-Install the mysql server.
+Install e.g. the mysql server.
 
 =item *
 
@@ -47,17 +50,33 @@ Download the GO term database, and install it.
 
 Run database creation script or manually, create a non-privilidged database user, install the GO term database and create additional needed tables (see separate documentation).
 
+=back
+
+Then obtain a release of the mimicDB data, or do the following:
+
+=over 4
+
+=item * 
+
+Run Philipp Ludin's mimicry pipeline on your species of interes.t
+
 =item *
 
-Obtain hmmer and a copy of the pfam database to make additional protein motif annotations.
+Obtain hmmer and a copy of the pfam database, if you want to make additional protein motif annotations.
 
 =item * 
 
-Obtain phobius to run additional protein signal peptide and topology predictions.
+Obtain phobius, if you want to run additional protein signal peptide and topology predictions.
+
+=back
+
+=over 4 
+
+Then use this script to load the database.
 
 =item * 
 
-run fill_db.sh to populate the database, and run the additional protein annotation.
+run fill_db.sh, which will run the additional protein annotation programs and populate the database.
 
 =back
 
@@ -67,7 +86,7 @@ To visualise the results you will also need a web server setup.
 
 =item *
 
-Install a web server (package tested with Apache). 
+Install a web server (package tested with Apache).
 
 =item *
 
@@ -75,13 +94,10 @@ Install the perl Titanium package.
 
 =item * 
 
-Copy the web interface files from the interface directory to wherever you want them within your web server document tree.
+Copy the web interface files from the interface directory to wherever
+you want them within your web server document tree.
 
 =back
-
-=head1 DESCRIPTION
-
-Populates the mimicDB mysql database from mimicry csv table form data.
 
 =head1 SHELL ENVIRONMENT VARIABLES
 
@@ -138,27 +154,33 @@ fi
 
 if [ -z "$BINDIR" ]
 then
-    BINDIR=~/mimicDB/interface
+    BINDIR=~/sandbox/mimicDB/bin
 fi
 
 if [ -z "$DATADIR" ]
 then
-    DATADIR=~/mimicDB/data/091028
+    DATADIR=~/sandbox/mimicDB/data/UpdProteomes
 fi
 
 if [ -z "$PFAMDB" ]
 then
-    PFAMDB=~/mimicDB/data/pfam/Pfam_ls.bin
+    PFAMDB=~/sandbox/mimicDB/data/pfam/Pfam-A.hmm
 fi
 
 if [ -z "$PHOBIUSBIN" ]
 then
-    PHOBIUSBIN=~/install/phobius/phobius.pl
+    PHOBIUSBIN=~/src/phobius/phobius.pl
+fi
+
+if [ -z "$HMMSCANBIN" ]
+then
+    # hmmpfam for hmmer-2
+    HMMSCANBIN=~/src/hmmer-3.0/src/hmmscan
 fi
 
 if [ -z "$TMP" ]
 then
-    TMP=~/mimicDB/tmp
+    TMP=~/sabdbix/mimicDB/tmp
 fi
 
 if [ -z "$MYSQLUSER" ]
@@ -173,7 +195,7 @@ fi
 
 export MYSQLUSER MYSQL
 
-<<'POD_ENV'
+: << 'POD_ENV'
 
 =item NN_TAXID [integer]
 
@@ -253,7 +275,25 @@ nr_of_species=${#species[@]}
 # a more clever way of dealing with the TAXID and cvs pairings/triad resolutions for loading is
 # perhaps to let the user give the taxids as part of the filenames?
 
-# load tables
+: <<'POD_FILES'
+
+=back
+
+=head1 FILES
+
+=over 4
+
+=item C<*-final>
+
+Tabular files from Philipp Ludin's pipeline. Place in your data
+directory for loading. I would suggest creating a specific "release"
+directory under data to keep track of versions and updates. 
+
+=cut
+
+POD_FILES
+
+o# load tables
 $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_malayi-final $BM_TAXID $HS_TAXID $IDCUTOFF
 $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_malayi-aedes-final $BM_TAXID $AE_TAXID $IDCUTOFF
 
@@ -286,8 +326,23 @@ for speciesnr in ${!species[*]}
 do 
     load_list=$TMP/${species[$speciesnr]}_sequences_loaded.list
 
+    registerFile $load_list temp
     $BINDIR/get_sequence_names_for_species.pl -t ${taxid[$speciesnr]} > $load_list
+
 done
+
+: << 'POD_FILES'
+
+=item C<species.fasta>
+
+Species specific peptide fasta files, containing (at least) the mimic
+hit candidates. Any sequence without an accepted hit will not be
+loaded to the database. We do provide linkout to uniprot/genbank, the
+sequence data is mainly for visualisation.
+
+=cut
+
+POD_FILES
 
 # extract fasta sequences
 for this_species in ${species[@]}
@@ -298,10 +353,12 @@ do
     
     # Note: I do have considerably faster fasta_header_grep versions in other projects for exact matching...
     if needsUpdate $load_fasta_file $load_list $species_fasta_file $BINDIR/fasta_header_grep.pl
-	$BINDIR/fasta_header_grep.pl -w -f $load_list $species_fasta_file > $load_fasta_file
+	registerFile $load_fasta_file result
+	$BINDIR/fasta_header_grep.pl -w -f $load_list $species_fasta_file > $load_fasta_file	
     fi
 
-    $BINDIR/load_sequences_from_fasta_file.pl $TMP/${this_species}_loaded.fasta
+    $BINDIR/load_sequences_from_fasta_file.pl $load_fasta_file
+
 done
 
 # pfam -- cut_tc is maybe a little cautious, but anyway, this is for a webpage display..
@@ -311,10 +368,12 @@ do
     pfam_results=$TMP/${this_species}_loaded.pfam_ls
     if needsUpdate $pfam_results $load_fasta_file $PFAMDB
     then
-	hmmpfam --cut_tc -A0 $PFAMDB $load_fasta_file > $pfam_results
+	registerFile $pfam_results result
+	$HMMSCANBIN --cut_tc -A0 $PFAMDB $load_fasta_file > $pfam_results
     fi
 
     $BINDIR/load_pfam_file.pl $pfam_results
+
 done
 
 # phobius
@@ -324,7 +383,16 @@ do
     phobius_results=$TMP/${this_species}_loaded.phobius
     if needsUpdate $phobius_results $load_fasta_file
 	$PHOBIUSBIN -long $load_fasta_file > $phobius_results
-    fi 
+    fi
 
+    registerFile $phobius_results result
     $BINDIR/load_phobius_long.pl $phobius_results
 done
+
+: <<'POD_FILES'
+
+=back
+
+=cut
+
+POD_FILES

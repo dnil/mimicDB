@@ -1,5 +1,8 @@
 #!/bin/bash
 # Daniel Nilsson, 091116
+#
+# separate script for running pfam on e.g. a cluster..
+#
 
 species=(B_malayi P_falciparum T_brucei T_cruzi L_major H_sapiens B_taurus A_aegypti A_gambiae E_histolytica S_mansoni E_cuniculi C_parvum B_burgdorferi L_monocytogenes L_pneumophila M_tuberculosis S_aureus Y_pestis)
 

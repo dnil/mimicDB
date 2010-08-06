@@ -23,7 +23,10 @@ L<http://www.mysql.com/dbownloads/mysql/>. A sample gentoo install:
  emerge dev-db/mysql
  emerge --config =dev-db/mysql-5.0.90-r2 
  rc-update add mysql default
- 
+
+Note that you should not give the unix root password - the default db
+owner is a separate db server user.
+
 Ensure it is currently running:
 
  /etc/init.d/mysql start
@@ -81,30 +84,37 @@ the web interface.
 =head2 Setup Philipp Ludin's mimicry pipeline
 
 Setup Philipp Ludin's mimicry pipeline to run on your species of
-interest, or obtain readymade *-final-files for your species.
+interest, or obtain readymade *-final-files for your species and place
+whereveryour $DATADIR points. In the readymade case, also obtain the
+original per species fasta files and also place these in the data dir.
 
 (Philipp, perhaps we should merge these packages?)
 
 =head2 hmmer
 
-Obtain
-hmmer and a copy of the pfam database to make additional protein motif
-annotations. Download hmmer, install and get a copy of the pfam database. 
+Obtain hmmer L<http://hmmer.janelia.org/> and install a copy of the pfam database L<http://pfam.sbc.su.se/>/
+ to make additional protein motif annotations. 
 
-NOTE: the current hmmer results parsing script is for hmmer2. This is
-on the todo-list, but in the meantime, please use hmmer2 and a
-compatible version of pfam. Sorry. I love hmmer3, and would like to
-see this issue solved, or will fix it myself upon opportunity.
+Get a copy of the pfam database (>=24.0 is needed for native hmmer-3 compatibility).
+
+ mkdir data/pfam; cd data/pfam
+ wget ftp://ftp.sanger.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
+ gunzip Pfam-A.hmm.gz
+
+NOTE: the current archive directory holds a hmmer results parsing script for hmmer2.
+If you use hmmer2 and a compatible version of pfam (<=23.0) please substitute this for the 
+load_pfam_file.pl
 
 =head2 Phobius
 
-Obtain Phobius to run additional protein signal peptide and topology predictions.
+Obtain Phobius L<http://phobius.sbc.su.se/> to run additional protein signal peptide and topology predictions.
 
 =head1 Configure mimicDB
 
 =head2 Tune the C<fill_db.sh> pipeline
 
-Please see the fill_db.sh documentation on how to set environment variables to reflect the location of your installation. E.g.
+Please see the fill_db.sh documentation on how to set environment
+variables to reflect the location of your installation. E.g.
 
  perldoc bin/fill_db.sh
 
@@ -122,6 +132,7 @@ Install the perl Titanium package.
 
 =head2 mimicDB interface
 
-Copy the web interface files from the interface directory to wherever you want them within your web s erver document tree.
+Copy the web interface files from the interface directory to wherever
+you want them within your web server document tree.
 
 =cut
