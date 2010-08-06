@@ -1,4 +1,13 @@
 #!/usr/bin/perl -w
+#
+# load_pfam_file.pl
+#
+# (c) Daniel Nilsson, 2009-2010
+# 
+# Released under the Perl Artistic License.
+# 
+# Version for use with hmmer2.
+#
 
 use DBI;
 
@@ -10,13 +19,12 @@ while (my $arg = shift @ARGV) {
 
     if ($arg =~ /^-/) {	
 	if ($arg eq '-f') {
-	    my $next_arg = shift @ARGV;
+	    my $next_arg = shift @ARGV; 
 	    if($next_arg eq "") {
 		print "-f requires an argument, but non given. Bailing out.\n";
 		exit 1;
-	    } else {
+	    } else {		
 	    }
-	    $pfamfile = $next_arg;
 	}
     } else {
 	$pfamfile = $arg;
@@ -58,6 +66,7 @@ my $named_seq_id = 0;
 my $identifier = "";
 my ($seq_start,$seq_end,$score,$evalue) = (0,0,0,0);
 
+
 my %description;
 
 while (my $l = <PFAMFILE>) {
@@ -65,14 +74,30 @@ while (my $l = <PFAMFILE>) {
     
     if ($inentry) {
 
-	if( $indomain == 1) {
+	if( $infamily == 1) {
+
+	    if($l eq "") {
+		$infamily =0;		
+	    } elsif ($l =~ /\-{5,}\s+\-{5,}/) {
+	    } else {
+		
+		($identifier, $desc) = ($l =~ m/(\S+)\s+(.+)\s+[\d\.]+\s+[-e\d\.]+\s+\d+$/);
+		
+		if(!defined($identifier) or $identifier eq "") {
+		    $DEBUG && print "No hit.\n";
+		} else {
+		    $desc =~ s/'/p/g;
+		    
+		    $description{$identifier} = $desc;
+		    $DEBUG && print $identifier, "\t", $desc, "\n";
+		}
+	    }
+	}
+
+	elsif( $indomain == 1) {
 
 	    if ($l =~ /\-{5,}\s+\-{5,}/) {
-
-	    } elsif ($l =~ /^\>\>\s+(\S+)\s+(.+)/) {
-		    $identifier =$1;
-		    $desc = $2;
-
+		
 	    } elsif ($l =~ m/^\/\//) { 
 		$indomain=0;
 		$inentry=0; 
@@ -80,29 +105,28 @@ while (my $l = <PFAMFILE>) {
 		$name="";
 		$identifier= "";
 	    } else {
-		# ignore any "?" flagged lines, below inclusion threshold
+		
+		($identifier,$seq_start,$seq_end,$score,$evalue) = ($l =~ m/^(\S+)\s+[\d\/]+\s+(\d+)\s+(\d+)\s+[\.\[\]]{2}\s+\d+\s+\d+\s+[\.\[\]]{2}\s+([\d\.]+)\s+([-e\d\.]+)/);
 #		$DEBUG && print $l,"\n";
-
-		# catch hmm score, i-Evalue, env from and env to from motif desc.
-		if( $l =~ m/^\s*\d+\s+\!\s+([-\d\.]+)\s+[\d\.]+\s+[-e\d\.]+\s+([-e\d\.]+)\s+\d+\s+\d+\s+[\.\[\]]{2}\s+\d+\s+\d+\s+[\.\[\]]{2}\s+(\d+)\s+(\d+)\s+[\.\[\]]{2}\s+[\d\.]+/ ) {
-		    ($score, $evalue, $seq_start,$seq_end) = ($1,$2,$3,$4);
-
-
-		    $DEBUG && print join("\t", $name, $identifier, $desc,$seq_start,$seq_end,$score,$evalue), "\n";
-		    $dbh->do("insert into mimic_sequence_motif (mimic_sequence_id, seq_start, seq_end,type, eval,score,identifier,description) VALUES($named_seq_id, $seq_start,$seq_end,'PFAM_LS','$evalue','$score','$identifier','".$description{$identifier}."');");
+		if(!defined($identifier) or $identifier eq "") {
+		    $DEBUG && print "No hit.\n";
 		} else {
-#		    $DEBUG && print "[[ line ignored ]].\n"
+		    $DEBUG && print join("\t", $name, $identifier, $description{$identifier},$seq_start,$seq_end,$score,$evalue), "\n";
+		    $dbh->do("insert into mimic_sequence_motif (mimic_sequence_id, seq_start, seq_end,type, eval,score,identifier,description) VALUES($named_seq_id, $seq_start,$seq_end,'PFAM_LS','$evalue','$score','$identifier','".$description{$identifier}."');");
 		}
 	    }
-	} elsif ($l =~ /^\>\>\s+(\S+)\s+(.+)/) {
-	    $identifier =$1;
-	    $desc = $2;
+	    
+	} elsif ($l =~ /Model\s+Description/) {
+	    $infamily = 1;          	    
+	} elsif ($l =~ /Model\s+Domain/) {
 	    $indomain = 1;
 	}
 
-    } elsif ($l =~ m/^Query:\s+(\S+)/) { 
+    } elsif ($l =~ m/^Query sequence:\s+(\S+)/) { 
 	# first time around..
-	$inentry=1;
+	$inentry=1; 
+
+	$infamily=0;
 	$indomain=0;
 
 	$name = $1;
@@ -111,8 +135,6 @@ while (my $l = <PFAMFILE>) {
 	} elsif($name=~/^([^\|]+)\|.+/) {
 	    $name = $1;
 	}
-	
-	$DEBUG && print "query $name\n";
 
 	my $sth=$dbh->prepare("select id from mimic_sequence where name='$name';");
 	$sth->execute();

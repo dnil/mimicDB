@@ -369,9 +369,10 @@ do
     if needsUpdate $pfam_results $load_fasta_file $PFAMDB
     then
 	registerFile $pfam_results result
-	$HMMSCANBIN --cut_tc -A0 $PFAMDB $load_fasta_file > $pfam_results
+#	$HMMSCANBIN --cut_tc -A0 $PFAMDB $load_fasta_file > $pfam_results
+	$HMMSCANBIN --cut_tc --noali $PFAMDB $load_fasta_file > $pfam_results
     fi
-
+    
     $BINDIR/load_pfam_file.pl $pfam_results
 
 done

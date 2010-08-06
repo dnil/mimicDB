@@ -95,11 +95,14 @@ original per species fasta files and also place these in the data dir.
 Obtain hmmer L<http://hmmer.janelia.org/> and install a copy of the pfam database L<http://pfam.sbc.su.se/>/
  to make additional protein motif annotations. 
 
-Get a copy of the pfam database (>=24.0 is needed for native hmmer-3 compatibility).
+Get a copy of the pfam database (>=24.0 is needed for native hmmer-3
+compatibility). If you get the text version, remember to press it to
+hmmer-3 binary format.
 
  mkdir data/pfam; cd data/pfam
  wget ftp://ftp.sanger.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
  gunzip Pfam-A.hmm.gz
+ hmmpress Pfam-A.hmm
 
 NOTE: the current archive directory holds a hmmer results parsing script for hmmer2.
 If you use hmmer2 and a compatible version of pfam (<=23.0) please substitute this for the 
