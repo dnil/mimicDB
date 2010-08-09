@@ -7,7 +7,24 @@
 package MimicDB;
 use base 'Titanium';
 
-my $myurl = "http://izbrio.unibe.ch/cgi-bin/mimicDB.pl";
+#
+# CONFIGURATION OPTIONS
+#
+my $myurl = 'http://130.237.207.130/cgi-bin/mimicDB.pl';
+my $mycss = '/mimicDB/mimicDB.css';
+my $mysqluser = 'mimicdb';
+my $mysqlpasswd = 'w3bbpublIC';
+#
+# END CONFIGURATION OPTIONS -- you should not need to edit below.
+#
+
+=over 4
+
+=item setup
+
+The module provides three run modes, 
+
+=cut
 
 sub setup {
     my $self = shift;
@@ -17,7 +34,7 @@ sub setup {
     $self->mode_param('rm');
 
     # db connect
-    $self->dbh_config('dbi:mysql:mygo', 'mimicdb', 'w3bbpublIC');
+    $self->dbh_config('dbi:mysql:mygo', $mysqluser, $mysqlpasswd);
 }
 
 sub teardown {
@@ -36,7 +53,7 @@ sub simple_go_search {
     $self->header_add("Content-Style-Type"=> "text/css");
 
     my $output .= $q->start_html(-title => "mimicDB - putative host-pathogen molecular mimicry",
-				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>'/mimicDB/mimicDB.css',-media=>'screen'}));
+				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>$mycss,-media=>'screen'}));
 
     $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - alpha version</SPAN></p>"; 
     $output .= $q->start_form();
@@ -77,7 +94,7 @@ sub output_hit_table {
 #    put style-type etc in $q->header()
     $self->header_add("-Content-Style-Type"=>"text/css");
     my $output .= $q->start_html(-title => "mimicDB - query: ".$goterm,
-				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>'/mimicDB/mimicDB.css',-media=>'screen'}));
+				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>$mycss,-media=>'screen'}));
 
     my %linkout_hash = ( 1 => "<a href=\"$myurl?rm=show_hit_details&name=linkPLACEholder\">linkPLACEholder</a><br><a  class=\"linkout\" href=\"http://www.uniprot.org/uniprot/linkPLACEholder\">UniProt</a>", 
 			 4 => "<a href=\"$myurl?rm=output_hit_table&goterm=linkPLACEholder\">linkPLACEholder</a><br><a class=\"linkout\" href=\"http://amigo.geneontology.org/cgi-bin/amigo/term-details.cgi?term=linkPLACEholder\">AmiGO</a>",
@@ -184,7 +201,7 @@ sub show_hit_details {
 
     $self->header_add("-Content-Style-Type"=>"text/css");
     my $output .= $q->start_html(-title => "mimicDB - details: ".$queryname,
-				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>'/mimicDB/mimicDB.css',-media=>'screen'}));
+				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>$mycss,-media=>'screen'}));
     
     $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - alpha version</SPAN></p>";
     

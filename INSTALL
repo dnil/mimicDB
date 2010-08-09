@@ -92,8 +92,9 @@ original per species fasta files and also place these in the data dir.
 
 =head2 hmmer
 
-Obtain hmmer L<http://hmmer.janelia.org/> and install a copy of the pfam database L<http://pfam.sbc.su.se/>/
- to make additional protein motif annotations. 
+Obtain hmmer L<http://hmmer.janelia.org/> and install a copy of the
+pfam database L<http://pfam.sbc.su.se/>/ to make additional protein
+motif annotations.
 
 Get a copy of the pfam database (>=24.0 is needed for native hmmer-3
 compatibility). If you get the text version, remember to press it to
@@ -104,9 +105,10 @@ hmmer-3 binary format.
  gunzip Pfam-A.hmm.gz
  hmmpress Pfam-A.hmm
 
-NOTE: the current archive directory holds a hmmer results parsing script for hmmer2.
-If you use hmmer2 and a compatible version of pfam (<=23.0) please substitute this for the 
-load_pfam_file.pl
+NOTE: the current archive directory holds a hmmer results parsing
+script for hmmer2. If you use hmmer2 and a compatible version of pfam
+(<=23.0) please substitute this for the load_pfam_file.pl currently
+found in the bin directory.
 
 =head2 Phobius
 
@@ -129,13 +131,48 @@ To visualise the results you will also need a web server setup.
 
 Install a web server (package tested with Apache). 
 
+Gentoo example:
+
+ emerge apache
+ rc-update add apache2 default
+
 =head2 Titanium libraries
 
 Install the perl Titanium package.
 
+ perl -MCPAN -eshell 
+ 
+and in the CPAN shell, 
+
+ install Titanium
+
+Depending on your installation, and Titanium version (1.04), you may
+also need to install the ValidateRM plugin
+
+ install CGI::Application::Plugin::ValidateRM
+
 =head2 mimicDB interface
 
 Copy the web interface files from the interface directory to wherever
-you want them within your web server document tree.
+you want them within your web server document tree. I would recommend
+somewhere where the web server will allow execution but not reading or
+browsing.
+
+ cp interface/*pl interface/*pm /var/www/cgi-bin/
+
+The css schema file is set to go into a directory F<mimicDB> directly
+in your document root. If this is not a good location for you, please
+update the C<$mycss> variable at the top of the MimicDB.pm module.
+
+ mkdir /var/www/htdocs/mimicDB
+ cp interface/*css /var/www/htdocs/mimicDB
+
+Edit at the top of MimicDB.pm to let the variable $myurl point to
+whatever your server needs, e.g.
+
+ my $myurl = 'http://mimicDB.org/cgi-bin/mimicDB.pl';
+ my $mycss = '/mimicDB/mimicDB.css';
+ my $mysqluser = 'mimicdb';
+ my $mysqlpasswd = 'w3bbpublIC';
 
 =cut
