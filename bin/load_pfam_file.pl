@@ -4,6 +4,29 @@ use DBI;
 
 my $DEBUG = 1;
 
+=head1 NAME
+
+load_pfam_file.pl
+
+=head1 AUTHOR
+
+Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nilsson@gmail.com
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2009, 2010 held by Daniel Nilsson. The package is realesed for use under the Perl Artistic License.
+
+=head1 SYNOPSIS
+
+USAGE: C<load_pfam_file.pl results.phobius_long_outoput>
+
+=head1 DESCRIPTION
+
+Loads hmmer-3 PFAM search results file into mimicDB.
+See F<archive/load_pfam_file.pl> for a hmmer-2 version.
+
+=cut
+
 my $pfamfile = "";
 
 while (my $arg = shift @ARGV) {
@@ -15,8 +38,8 @@ while (my $arg = shift @ARGV) {
 		print "-f requires an argument, but non given. Bailing out.\n";
 		exit 1;
 	    } else {
+		$pfamfile = $next_arg;
 	    }
-	    $pfamfile = $next_arg;
 	}
     } else {
 	$pfamfile = $arg;

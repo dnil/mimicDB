@@ -34,7 +34,7 @@ USAGE: C<fill_db.sh>
 See README and INSTALL for more instructions. Briefly an initial setup
 workflow would be as follows.
 
-You will want a database backend:
+You will first want a database backend running.
 
 =over 4
 
@@ -52,7 +52,7 @@ Run database creation script or manually, create a non-privilidged database user
 
 =back
 
-Then obtain a release of the mimicDB data, or do the following:
+Obtain a release of the mimicDB data, or do the following:
 
 =over 4
 
@@ -70,13 +70,14 @@ Obtain phobius, if you want to run additional protein signal peptide and topolog
 
 =back
 
-=over 4 
+Use this F<fill_db.sh> script to load the database.
 
-Then use this script to load the database.
+=over 4 
 
 =item * 
 
-run fill_db.sh, which will run the additional protein annotation programs and populate the database.
+run C<fill_db.sh>, which will in turn run the additional protein annotation
+programs and populate the database.
 
 =back
 
@@ -95,7 +96,8 @@ Install the perl Titanium package.
 =item * 
 
 Copy the web interface files from the interface directory to wherever
-you want them within your web server document tree.
+you want them within your web server document tree, and optionally change 
+some configuration variables in the MimicDB.pm module.
 
 =back
 
@@ -117,17 +119,17 @@ POD_INIT
 
 Minimum number of identities required in matches to load entry to database.
 
-=item BINDIR [path (~/mimicDB/interface)]          
+=item BINDIR [path (~/mimicDB/interface)]
 
 Directory where the rest of the mimicDB pipeline lives.
 
 =item DATADIR [path (~/mimicDB/data/091028)]
 
-Directory where the mimicDB data to load lives. 
+Directory where the mimicDB data to load lives.
 
 =item PFAMDB [path (~/mimicDB/data/pfam/Pfam_ls.bin)]
 
-Directory where the pfam database lives. 
+Directory where the pfam database lives.
 
 =item PHOBIUSBIN [path (~/install/phobius/phobius.pl)]
 
@@ -180,7 +182,7 @@ fi
 
 if [ -z "$TMP" ]
 then
-    TMP=~/sabdbix/mimicDB/tmp
+    TMP=~/sandbox/mimicDB/tmp
 fi
 
 if [ -z "$MYSQLUSER" ]
@@ -293,7 +295,9 @@ directory under data to keep track of versions and updates.
 
 POD_FILES
 
-o# load tables
+# load tables
+echo Loading tables...
+
 $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_malayi-final $BM_TAXID $HS_TAXID $IDCUTOFF
 $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_malayi-aedes-final $BM_TAXID $AE_TAXID $IDCUTOFF
 
@@ -321,6 +325,7 @@ $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/S_aureus-final $SA_TAXID $HS
 $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/Y_pestis-final $YP_TAXID $HS_TAXID $IDCUTOFF
 
 # extract lists of loaded sequence names (after filtering on load)
+echo Extract lists...
 
 for speciesnr in ${!species[*]}
 do 
@@ -329,6 +334,21 @@ do
     registerFile $load_list temp
     $BINDIR/get_sequence_names_for_species.pl -t ${taxid[$speciesnr]} > $load_list
 
+    sha2sum $load_list > $load_list.sha2.new
+
+    if [ -e $load_list.sha2 ]
+    then
+	sha2sum --status -c $load_list.sha2
+	if [ $? -ne 0 ]
+	then
+	    mv $load_list.sha2.new $load_list.sha2
+	else
+	    :
+	    # keep old checksum file, indicating that the file was not changed.
+	fi
+    else
+	mv $load_list.sha2.new $load_list.sha2
+    fi
 done
 
 : << 'POD_FILES'
@@ -345,6 +365,7 @@ sequence data is mainly for visualisation.
 POD_FILES
 
 # extract fasta sequences
+echo Extract fasta sequences...
 for this_species in ${species[@]}
 do
     load_list=$TMP/${this_species}_sequences_loaded.list
@@ -352,7 +373,8 @@ do
     species_fasta_file=$DATADIR/${this_species}.fasta
     
     # Note: I do have considerably faster fasta_header_grep versions in other projects for exact matching...
-    if needsUpdate $load_fasta_file $load_list $species_fasta_file $BINDIR/fasta_header_grep.pl
+    if needsUpdate $load_fasta_file $load_list.sha2 $species_fasta_file $BINDIR/fasta_header_grep.pl
+    then
 	registerFile $load_fasta_file result
 	$BINDIR/fasta_header_grep.pl -w -f $load_list $species_fasta_file > $load_fasta_file	
     fi
@@ -362,8 +384,9 @@ do
 done
 
 # pfam -- cut_tc is maybe a little cautious, but anyway, this is for a webpage display..
+echo Run PFAM search...
 for this_species in ${species[@]}
-do 
+do
     load_fasta_file=$TMP/${this_species}_loaded.fasta
     pfam_results=$TMP/${this_species}_loaded.pfam_ls
     if needsUpdate $pfam_results $load_fasta_file $PFAMDB
@@ -378,11 +401,13 @@ do
 done
 
 # phobius
+echo Run Phobius...
 for this_species in ${species[@]}
 do 
     load_fasta_file=$TMP/${this_species}_loaded.fasta
     phobius_results=$TMP/${this_species}_loaded.phobius
     if needsUpdate $phobius_results $load_fasta_file
+    then
 	$PHOBIUSBIN -long $load_fasta_file > $phobius_results
     fi
 

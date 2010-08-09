@@ -164,9 +164,10 @@ function registerFile()
 
     # check that it's not already on the list?
     grep -x $savefile ${register} > /dev/null
-    if [ $? == 0 ] 
-    then 
+    if [ $? -eq 0 ]
+    then
 	# savefile was already on the register file
+	:
     else
 	echo $savefile >> ${register} 
     fi
@@ -294,4 +295,3 @@ then
     exit
 fi
 
-if [ -x $

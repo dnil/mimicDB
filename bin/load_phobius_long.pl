@@ -1,11 +1,14 @@
 #!/usr/bin/perl -w
 
+use DBI;
+
+my $DEBUG = 1;
+
 =head1 NAME
 
 load_phobius_long.pl
 
 =head1 AUTHOR
-
 
 Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nilsson@gmail.com
 
@@ -22,10 +25,6 @@ USAGE: C<load_phobius_long.pl results.phobius_long_outoput>
 Loads phobius results file in the long format output into mimicDB.
 
 =cut
-
-use DBI;
-
-my $DEBUG = 1;
 
 my $phobius_long="";
 

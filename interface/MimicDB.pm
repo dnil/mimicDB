@@ -1,11 +1,32 @@
 #!/usr/bin/perl -w
-
-# Installing Titanium: tests succeeded but 3 dependencies missing (CGI::Application::Server,Test::WWW::Mechanize::CGIApp,Module::Starter::Plugin::CGIApp)
 #
 # create fulltext index termname on term (name);
 
 package MimicDB;
 use base 'Titanium';
+
+=head1 NAME
+
+MimicDB.pm
+
+=head1 AUTHOR
+
+Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nilsson@gmail.com
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2009, 2010 held by Daniel Nilsson. The package is realesed for use under the Perl Artistic License.
+
+=head1 DESCRIPTION
+
+Web interface for mimicDB built on the Titanium CGI::Application framework.
+
+=head1 CONFIGURATION OPTIONS
+
+Please edit configuration variables at the top of the module to
+reflect your local server settings.
+
+=cut
 
 #
 # CONFIGURATION OPTIONS
@@ -18,11 +39,15 @@ my $mysqlpasswd = 'w3bbpublIC';
 # END CONFIGURATION OPTIONS -- you should not need to edit below.
 #
 
+=head1 FUNCTIONS
+
 =over 4
 
 =item setup
 
-The module provides three run modes, 
+The module provides three run modes, C<simple_go_search>,
+C<output_hit_table> and C<show_hit_details>, with C<simple_go_search>
+set as the default mode.
 
 =cut
 
@@ -44,6 +69,13 @@ sub teardown {
     my $dbh = $self->dbh();
     $dbh->disconnect();
 }
+
+=item simple_go_search
+
+This is the main search interface, presenting a google-esqe search box
+and a few examples.
+
+=cut
 
 sub simple_go_search {
     my $self = shift;
@@ -82,6 +114,15 @@ sub simple_go_search {
 
     return $output;
 }
+
+
+=item output_hit_table
+
+The brain part of the search interface. This mode is called with
+whatever query is given from the search interface and returns a table
+of hits, if any are found.
+
+=cut
 
 sub output_hit_table {
     my $self = shift;
@@ -189,6 +230,14 @@ $sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mim
 
     return $output;
 }
+
+=item show_hit_details
+
+This mode provides details about a particular sequence. Currently,
+this means hit tables, with reciprocal lookup for the hits, and
+visualisations in the form of motif colored protein text sequences.
+
+=cut
 
 sub show_hit_details {
     my $self = shift;
@@ -461,6 +510,16 @@ sub show_hit_details {
     return $output;
 }
 
+=item _linebreak
+
+SYNOPSIS:
+	$postpone_output .= $self->_linebreak(\$hitseq, 60,"<br>");
+
+Internal function. Linebreak a string after a set number of characters
+with the given breakstring. Currently unused as more complex
+formatting is required in the detailed display and laziness struck.
+
+=cut
 
 sub _linebreak {
     my $self =shift;
@@ -485,6 +544,17 @@ sub _linebreak {
     return $outstring;
 }
 
+=item _linkout_columns
+
+SYNOPSIS: 
+
+    $self->_linkout_columns(\%linkout_hash, \@answer);
+
+Internal function to replace the text linkPLACEholder in a column in C<@answer> designated by 
+the key of C<%linkout_hash> by the corresponding value of the same hash.
+
+=cut
+
 sub _linkout_columns {
 
     my $self = shift;
@@ -502,6 +572,17 @@ sub _linkout_columns {
     }
 }
 
+=item _remove_nonvarying_fields
+
+SYNOPSIS:	
+    $self->_remove_nonvarying_fields( \@unfold_trigger_fields, \@answer, \@last_answer )
+
+Internal function. Fold away constant table fields to remove unneeded
+ink from a table. Certain key fields can be selected as trigger fields
+C<@unfold_trigger_fields>, and variation in any of the selected fields
+will cause all the fields of the current row to be displayed.
+
+=cut
 
 sub _remove_nonvarying_fields {
 
@@ -533,6 +614,18 @@ sub _remove_nonvarying_fields {
     return;
 }
 
+=item _alternate_color_element_join
+
+SYNOPSIS:	
+ 
+     $more_postponed_output .= $self->_alternate_color_element_join("th",@header);
+
+Internal function. Return an html string coding formatting an array
+into alternating colors of particular element in a list, e.g. TD or TH
+elements.
+
+=cut
+
 sub _alternate_color_element_join {
     my $self = shift;
     my $element = shift;
@@ -561,8 +654,10 @@ sub _alternate_color_element_join {
     return $out;
 }
 
+=back
+
+=cut
 
 1;
-
 
 #  LocalWords:  Outstring
