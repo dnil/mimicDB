@@ -1,9 +1,32 @@
 #!/usr/bin/perl -w
 # Daniel Nilsson, 2009
 
-#usage: txt_to_mysql tabfilename parasite_taxa_id host_tax_id id_cutoff 
-# ./interface/pludin_final_txt_to_mimic_mysql.pl data/brugia090130/B_malayi-090130-final.txt 6279 9606 11
-# ./interface/pludin_final_txt_to_mimic_mysql.pl data/brugia-aedes-090204/B_malayi-final 6279 7159 11
+=head1 NAME
+
+pludin_final_txt_to_mimic_mysql.pl
+
+=head1 AUTHOR
+
+Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nilsson@gmail.com
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2009, 2010 held by Daniel Nilsson. The package is realesed for use under the Perl Artistic License.
+
+=head1 SYNOPSIS
+
+USAGE: 
+
+    pludin_final_txt_to_mimic_mysql.pl tabfilename parasite_taxa_id host_tax_id id_cutoff 
+
+ ./interface/pludin_final_txt_to_mimic_mysql.pl data/brugia090130/B_malayi-090130-final.txt 6279 9606 11
+ ./interface/pludin_final_txt_to_mimic_mysql.pl data/brugia-aedes-090204/B_malayi-final 6279 7159 11
+
+=head1 DESCRIPTION
+
+Loads Philipp Ludin's mimicry predictions into mimicDB mysql tables.
+
+=cut
 
 use DBI;
 
