@@ -81,7 +81,7 @@ my $named_seq_id = 0;
 my $identifier = "";
 my ($seq_start,$seq_end,$score,$evalue) = (0,0,0,0);
 
-my %description;
+my $desc = "";
 
 while (my $l = <PFAMFILE>) {
     chomp $l;
@@ -110,9 +110,8 @@ while (my $l = <PFAMFILE>) {
 		if( $l =~ m/^\s*\d+\s+\!\s+([-\d\.]+)\s+[\d\.]+\s+[-e\d\.]+\s+([-e\d\.]+)\s+\d+\s+\d+\s+[\.\[\]]{2}\s+\d+\s+\d+\s+[\.\[\]]{2}\s+(\d+)\s+(\d+)\s+[\.\[\]]{2}\s+[\d\.]+/ ) {
 		    ($score, $evalue, $seq_start,$seq_end) = ($1,$2,$3,$4);
 
-
 		    $DEBUG && print join("\t", $name, $identifier, $desc,$seq_start,$seq_end,$score,$evalue), "\n";
-		    $dbh->do("insert into mimic_sequence_motif (mimic_sequence_id, seq_start, seq_end,type, eval,score,identifier,description) VALUES($named_seq_id, $seq_start,$seq_end,'PFAM_LS','$evalue','$score','$identifier','".$description{$identifier}."');");
+		    $dbh->do("insert into mimic_sequence_motif (mimic_sequence_id, seq_start, seq_end,type, eval,score,identifier,description) VALUES($named_seq_id, $seq_start,$seq_end,'PFAM_LS','$evalue','$score','$identifier','".$desc."');");
 		} else {
 #		    $DEBUG && print "[[ line ignored ]].\n"
 		}
