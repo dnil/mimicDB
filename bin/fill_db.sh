@@ -119,23 +119,27 @@ POD_INIT
 
 Minimum number of identities required in matches to load entry to database.
 
-=item BINDIR [path (~/mimicDB/interface)]
+=item BINDIR [path (~/sandbox/mimicDB/bin)]
 
 Directory where the rest of the mimicDB pipeline lives.
 
-=item DATADIR [path (~/mimicDB/data/091028)]
+=item DATADIR [path (~/sandbox/mimicDB/data/091028)]
 
 Directory where the mimicDB data to load lives.
 
-=item PFAMDB [path (~/mimicDB/data/pfam/Pfam_ls.bin)]
+=item PFAMDB [path (~/sandbox/mimicDB/data/pfam/pfam-A.hmm)]
 
 Directory where the pfam database lives.
 
-=item PHOBIUSBIN [path (~/install/phobius/phobius.pl)]
+=item PHOBIUSBIN [path (~/src/phobius/phobius.pl)]
 
 Path to the phobius binary.
 
-=item TMP [path (~/mimicDB/tmp)]
+=item HMMSCANBIN [path (~/src/hmmer-3.0/src/hmmscan)]
+
+Path to the phobius binary.
+
+=item TMP [path (~/sandbox/mimicDB/tmp)]
 
 Path to a directory where temporary files and intermediate results can be held/found.
 
@@ -380,8 +384,21 @@ do
     fi
 
     $BINDIR/load_sequences_from_fasta_file.pl $load_fasta_file
-
+    
 done
+
+echo Calculate Shannon entropy and upload...
+
+if needsUpdate $shannon_entropy $hit_fasta_file $BINDIR/shannon_source_entropy.pl
+then
+    
+
+    $BINDIR/shannon_source_entropy.pl $load_fasta_file > $shannon_entropy
+
+    $BINDIR/load_shannon_source_entropy.pl $shannon_entropy
+fi
+
+
 
 # pfam -- cut_tc is maybe a little cautious, but anyway, this is for a webpage display..
 echo Run PFAM search...
