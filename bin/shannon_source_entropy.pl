@@ -1,49 +1,28 @@
 #!/usr/bin/perl
 
-#my $proteome_file=$ARGV[0];
+=head1 NAME
+
+shannon_source_entropy.pl
+
+=head1 AUTHOR
+
+Daniel Nilsson, daniel.nilsson@izb.unibe.ch, daniel.nilsson@ki.se, daniel.k.nilsson@gmail.com
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2009, 2010 held by Daniel Nilsson. The package is realesed for use under the Perl Artistic License.
+
+=head1 SYNOPSIS
+
+USAGE: C<shannon_source_entropy.pl peptides.fasta>
+
+=head1 DESCRIPTION
+
+Calculates Shannon source entropy from peptide fasta files.
+
+=cut
+
 my $peptide_file=$ARGV[0];
-
-# read proteome
-
-#open PROTEOMEFILE, $proteome_file or die "Could not open $proteome_file.\nUsage: shannon_all_messages.pl proteome.fasta peptide.fasta\n";
-
-#my $inseq = 0; 
-#my $seq = "";
-#my $name = "";
-
-#my %aa;
-
-#while (my $l = <PROTEOMEFILE>) {
-#    chomp $l;
-#    
-#    if ($inseq) {
-
-#  	if ($l =~ m/^>(\S+)/) { 
-#  	    $inseq=1;
-
-#  	    my @residues=split(/ */,$seq);
-#  	    map { $aa{$_} = (exists($aa{$_}))?($aa{$_}+1):1 } @residues;
-		  
-#  	    $seq = "";
-#  	} else {
-#  	    $l =~ s/\s+//g;
-#  	    $seq .= $l;	
-#  	}	
-#      } elsif ($l =~ m/^>(\S+)/) { 
-#  	# first time around..
-#  	$inseq=1; 
-	
-#  	$seq = "";
-#      }
-#  }
-
-# # # last entry
-# if($inseq==1) { 
-#     my @residues=split(/ */,$seq);
-#     map { $aa{$_} = exists($aa{$_})?$aa{$_}+1:1 } @residues;	  
-# }
-
-# close PROTEOMEFILE;
 
 open PEPTIDEFILE, $peptide_file or die "Could not open $peptide_file.\n";
 

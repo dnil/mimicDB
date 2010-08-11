@@ -389,16 +389,7 @@ done
 
 echo Calculate Shannon entropy and upload...
 
-if needsUpdate $shannon_entropy $hit_fasta_file $BINDIR/shannon_source_entropy.pl
-then
-    
-
-    $BINDIR/shannon_source_entropy.pl $load_fasta_file > $shannon_entropy
-
-    $BINDIR/load_shannon_source_entropy.pl $shannon_entropy
-fi
-
-
+$BINDIR/load_shannon_entropy.pl
 
 # pfam -- cut_tc is maybe a little cautious, but anyway, this is for a webpage display..
 echo Run PFAM search...

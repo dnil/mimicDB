@@ -18,6 +18,8 @@ create table mimic_sequence_seq ( id integer AUTO_INCREMENT not null PRIMARY KEY
 
 create table mimic_sequence_motif ( id integer AUTO_INCREMENT not null PRIMARY KEY, mimic_sequence_id integer, foreign key (mimic_sequence_id) references mimic_sequence(id), seq_start integer, seq_end integer, type varchar(8), eval float, score float, identifier varchar(55), description varchar(128) );
 
+create table mimic_hit_entropy ( id integer AUTO_INCREMENT not null PRIMARY KEY, mimic_hit_id integer, foreign key (mimic_hit_id) references mimic_hit(id), query_H float, subject_H float);
+
 create fulltext index termname on term (name);
 
 -- How about indexes for mimic_sequence.description, query_mimic_sequence.description, query_mimic_sequence.name, mimic_sequence.name, (gene_product.symbol, gene_product.full_name)? OK?

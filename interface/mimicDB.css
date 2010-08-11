@@ -44,7 +44,7 @@ span.seqhitmotif {
 
 span.seqhit {
     font-family: courier,monospace;
-#    color: #e04020;
+/*    color: #e04020; */
     color: #a04040;
     font-weight: bold;
 }
@@ -90,7 +90,7 @@ th.even {
 }
 
 a:link {
-    font-color: #4040f0;
+    color: #4040f0;
     text-decoration: none;
 }
 
@@ -106,7 +106,7 @@ a:link.linkout {
     text-align: center;
 }
 
-a:visted.linkout {
+a:visited.linkout {
     color: #6060f0;
     text-decoration: none;
     font-size: small;
