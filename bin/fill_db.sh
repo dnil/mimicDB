@@ -141,7 +141,8 @@ Path to the phobius binary.
 
 =item TMP [path (~/sandbox/mimicDB/tmp)]
 
-Path to a directory where temporary files and intermediate results can be held/found.
+Path to a directory where temporary files and intermediate results can be held/found. 
+This directoty will be created at runtime if it does not already exist.
 
 =item MYSQLUSER [username (mygo)]
 
@@ -187,6 +188,11 @@ fi
 if [ -z "$TMP" ]
 then
     TMP=~/sandbox/mimicDB/tmp
+fi
+
+if [ ! -e "$TMP" ]
+then 
+    mkdir $TMP
 fi
 
 if [ -z "$MYSQLUSER" ]

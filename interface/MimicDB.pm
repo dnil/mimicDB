@@ -24,7 +24,12 @@ Web interface for mimicDB built on the Titanium CGI::Application framework.
 =head1 CONFIGURATION OPTIONS
 
 Please edit configuration variables at the top of the module to
-reflect your local server settings.
+reflect your local server settings. This involves the following:
+
+ my $myurl = 'http://130.237.207.130/cgi-bin/mimicDB.pl';
+ my $mycss = '/mimicDB/mimicDB.css';
+ my $mysqluser = 'mimicdb';
+ my $mysqlpasswd = 'w3bbpublIC';
 
 =cut
 

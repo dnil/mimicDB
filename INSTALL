@@ -76,7 +76,7 @@ mileage may vary.
 
 This creates a few new tables in the mygo database, as well as a less
 priviledged database user "mygo" to control access to the GO term
-database, and one completely unpriviledged "mygoweb" for access from 
+database, and one completely unpriviledged "mimicdb" for access from 
 the web interface.
 
 =head1 Tools for data generation
