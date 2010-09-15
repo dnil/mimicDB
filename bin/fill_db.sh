@@ -58,7 +58,7 @@ Obtain a release of the mimicDB data, or do the following:
 
 =item * 
 
-Run Philipp Ludin's mimicry pipeline on your species of interes.t
+Run Philipp Ludin's mimicry pipeline on your species of interest. 
 
 =item *
 
@@ -166,7 +166,7 @@ fi
 
 if [ -z "$DATADIR" ]
 then
-    DATADIR=~/sandbox/mimicDB/data/UpdProteomes
+    DATADIR=~/sandbox/mimicDB/data/proteomes100831
 fi
 
 if [ -z "$PFAMDB" ]
@@ -207,85 +207,9 @@ fi
 
 export MYSQLUSER MYSQL
 
-: << 'POD_ENV'
-
-=item NN_TAXID [integer]
-
-E.g. HS_TAXID=9696 for H. sapiens.
-
-Hardcoded NCBI taxonomy ids - could be replaced with database lookups
-from names or such, but we are still operating very much on a small
-scale here, with only a few complete host-parasite-vector cycles
-available and rather little need for automation yet.
-
-=cut
-
-POD_ENV
-
-# hardcoded NCBI taxonomy ids
-
-BM_TAXID=6279
-HS_TAXID=9606
-
-BT_TAXID=9913
-
-AE_TAXID=7159
-
-AG_TAXID=7165
-
-PF_TAXID=5833
-CP_TAXID=5807
-TP_TAXID=5875
-EC_TAXID=6035
-
-TB_TAXID=5691
-LM_TAXID=5664
-TC_TAXID=5693
-
-EH_TAXID=5759
-
-SM_TAXID=6183
-
-BB_TAXID=139
-LMO_TAXID=1639
-LP_TAXID=446
-MT_TAXID=1773
-SA_TAXID=1280
-YP_TAXID=632
-
-: <<'POD_ENV'
-
-=item taxid [(list of taxid integers)]
-
-A list of the taxonomy ids to be considered for loading. 
-
-=item species [(list of species identifiers)]
-
-A list of species identifiers carefully ensure the same order in species and taxid.
-
-Known problem: this is inelegant and works only for small sets of
-organisms.  A more clever way of dealing with the TAXID and cvs
-pairings is perhaps to let the user give the taxids as part of the
-filenames?
-
-=cut
-
-POD_ENV
-
-# carefully ensure the same order in species and taxid
-species=(B_malayi P_falciparum T_brucei T_cruzi L_major T_parva H_sapiens B_taurus A_aegypti A_gambiae E_histolytica S_mansoni E_cuniculi C_parvum B_burgdorferi L_monocytogenes L_pneumophila M_tuberculosis S_aureus Y_pestis)
-taxid=($BM_TAXID $PF_TAXID $TB_TAXID $TC_TAXID $LM_TAXID $TP_TAXID $HS_TAXID $BT_TAXID $AE_TAXID $AG_TAXID $EH_TAXID $SM_TAXID $EC_TAXID $CP_TAXID $BB_TAXID $LMO_TAXID $LP_TAXID $MT_TAXID $SA_TAXID $YP_TAXID)
-
-# END ENV
-
 # uses pipelinefunk.sh for needsUpdate, registerFile etc.
 
 . pipelinefunk.sh
-
-nr_of_species=${#species[@]}
-
-# a more clever way of dealing with the TAXID and cvs pairings/triad resolutions for loading is
-# perhaps to let the user give the taxids as part of the filenames?
 
 : <<'POD_FILES'
 
@@ -299,7 +223,14 @@ nr_of_species=${#species[@]}
 
 Tabular files from Philipp Ludin's pipeline. Place in your data
 directory for loading. I would suggest creating a specific "release"
-directory under data to keep track of versions and updates. 
+directory under data to keep track of versions and updates. File name
+convention is Species_parasite-Species_host-final (or A_parasite-final
+if the host is H_sapiens). The names are important for NCBI taxonomy
+id lookup and so for proper connection to the go-term db. Abbreviation
+of the genus is ok if this still allows unique lookup of ncbi taxa
+id. If unsure, just use the full species name. Genus and species are
+separated by an underscore "_", the parasite and host by a dash "-",
+and the file name ends in "-final".
 
 =cut
 
@@ -308,56 +239,54 @@ POD_FILES
 # load tables
 echo Loading tables...
 
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_malayi-final $BM_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_malayi-aedes-final $BM_TAXID $AE_TAXID $IDCUTOFF
+# bash >= 4 has associative arrays built in.
+declare -A taxid
 
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/P_falciparum-final $PF_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/P_falciparum-anopheles-final $PF_TAXID $AG_TAXID $IDCUTOFF
+for file in $DATADIR/*final
+do 
+    parasp=`basename $file |cut -f1 -d-`
+    hostsp=`basename $file |cut -f2 -d-`
+    if [ "$hostsp" == "final" ] 
+    then
+	hostsp=H_sapiens
+    fi
 
-# $BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/T_brucei-final $TB_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/T_brucei-B_taurus-final $TB_TAXID $BT_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/T_parva-B_taurus-final $TP_TAXID $BT_TAXID $IDCUTOFF
+    # debug
+    echo $parasp $hostsp >&2 
+    taxid_parasite=`$BINDIR/get_taxid.pl $parasp`
+    taxid_host=`$BINDIR/get_taxid.pl $hostsp`
 
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/T_cruzi-final $TC_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/L_major-final $LM_TAXID $HS_TAXID $IDCUTOFF
+    $BINDIR/pludin_final_txt_to_mimic_mysql.pl $file $taxid_parasite $taxid_host $IDCUTOFF
 
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/E_histolytica-final $EH_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/S_mansoni-final $SM_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/E_cuniculi-final $EC_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/C_parvum-final $CP_TAXID $HS_TAXID $IDCUTOFF
-
-#bacterial
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/B_burgdorferi-final $BB_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/L_monocytogenes-final $LMO_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/L_pneumophila-final $LP_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/M_tuberculosis-final $MT_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/S_aureus-final $SA_TAXID $HS_TAXID $IDCUTOFF
-$BINDIR/pludin_final_txt_to_mimic_mysql.pl $DATADIR/Y_pestis-final $YP_TAXID $HS_TAXID $IDCUTOFF
+    taxid[$parasp]=$taxid_parasite
+    # test adding host, though it's actually rather likey to already be set.
+    taxid[$hostsp]=$taxid_host
+done
 
 # extract lists of loaded sequence names (after filtering on load)
 echo Extract lists...
 
-for speciesnr in ${!species[*]}
-do 
-    load_list=$TMP/${species[$speciesnr]}_sequences_loaded.list
+for species in ${!taxid[*]}
+do
+    load_list=$TMP/${species}_sequences_loaded.list
 
     registerFile $load_list temp
-    $BINDIR/get_sequence_names_for_species.pl -t ${taxid[$speciesnr]} > $load_list
+    $BINDIR/get_sequence_names_for_species.pl -t ${taxid[$species]} > $load_list
+    
+    shasum $load_list > $load_list.sha.new
 
-    sha2sum $load_list > $load_list.sha2.new
-
-    if [ -e $load_list.sha2 ]
+    if [ -e $load_list.sha ]
     then
-	sha2sum --status -c $load_list.sha2
+	shasum --status -c $load_list.sha
 	if [ $? -ne 0 ]
 	then
-	    mv $load_list.sha2.new $load_list.sha2
+	    mv $load_list.sha2.new $load_list.sha
 	else
 	    :
 	    # keep old checksum file, indicating that the file was not changed.
 	fi
     else
-	mv $load_list.sha2.new $load_list.sha2
+	mv $load_list.sha.new $load_list.sha
     fi
 done
 
@@ -376,7 +305,7 @@ POD_FILES
 
 # extract fasta sequences
 echo Extract fasta sequences...
-for this_species in ${species[@]}
+for this_species in ${!taxid[*]}
 do
     load_list=$TMP/${this_species}_sequences_loaded.list
     load_fasta_file=$TMP/${this_species}_loaded.fasta
@@ -399,7 +328,7 @@ $BINDIR/load_shannon_entropy.pl
 
 # pfam -- cut_tc is maybe a little cautious, but anyway, this is for a webpage display..
 echo Run PFAM search...
-for this_species in ${species[@]}
+for this_species in ${!taxid[*]}
 do
     load_fasta_file=$TMP/${this_species}_loaded.fasta
     pfam_results=$TMP/${this_species}_loaded.pfam_ls
@@ -416,7 +345,7 @@ done
 
 # phobius
 echo Run Phobius...
-for this_species in ${species[@]}
+for this_species in ${!taxid[*]}
 do 
     load_fasta_file=$TMP/${this_species}_loaded.fasta
     phobius_results=$TMP/${this_species}_loaded.phobius
