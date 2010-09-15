@@ -31,6 +31,23 @@ span.version {
     font-size: 12pt;
 }
 
+div#middle {
+    width: 600px;
+    margin: 0 auto; 
+}
+
+div#search {
+    text-align: center;
+}
+
+div#instruction {
+    text-align: justify;
+}
+
+div#head {
+    text-align: left;    
+}
+
 .sequence {
     font-family: courier,monospace;
 }
@@ -87,6 +104,10 @@ th.even {
     font-family: arial,sans-serif;
     font-weight: bold;
     color: black
+}
+
+a.head {
+    text-decoration: none;
 }
 
 a:link {

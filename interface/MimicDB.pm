@@ -5,6 +5,8 @@
 package MimicDB;
 use base 'Titanium';
 
+my $version = "100914";
+
 =head1 NAME
 
 MimicDB.pm
@@ -26,8 +28,8 @@ Web interface for mimicDB built on the Titanium CGI::Application framework.
 Please edit configuration variables at the top of the module to
 reflect your local server settings. This involves the following:
 
- my $myurl = 'http://130.237.207.130/cgi-bin/mimicDB.pl';
- my $mycss = '/mimicDB/mimicDB.css';
+ my $myurl = 'http://mimicdb.scilifelab.se/cgi-bin/mimicDB.pl';
+ my $mycss = '/mimicDB.css';
  my $mysqluser = 'mimicdb';
  my $mysqlpasswd = 'w3bbpublIC';
 
@@ -36,8 +38,8 @@ reflect your local server settings. This involves the following:
 #
 # CONFIGURATION OPTIONS
 #
-my $myurl = 'http://130.237.207.130/cgi-bin/mimicDB.pl';
-my $mycss = '/mimicDB/mimicDB.css';
+my $myurl = 'http://mimicdb.scilifelab.se/cgi-bin/mimicDB.pl';
+my $mycss = '/mimicDB.css';
 my $mysqluser = 'mimicdb';
 my $mysqlpasswd = 'w3bbpublIC';
 #
@@ -93,11 +95,14 @@ sub simple_go_search {
     my $output .= $q->start_html(-title => "mimicDB - putative host-pathogen molecular mimicry",
 				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>$mycss,-media=>'screen'}));
 
-    $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - alpha version</SPAN></p>"; 
-    $output .= $q->start_form();
-    $output .= "<center>";
+    $output .= "<div id=\"head\"><p><a class=\"head\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - version $version</SPAN></p></div>";
+
+    $output .= "<div id=\"middle\">";
+
+    $output .= "<div id=\"search\">";
     $output .= $q->h2("Putative host-pathogen molecular mimicry candidates.");
     $output .= "\n";
+    $output .= $q->start_form();
     $output .= "<p><input type=\"hidden\" name=\"rm\" value=\"output_hit_table\" />\n";
 
     $output .= $q->textfield(-name=>'goterm',
@@ -108,14 +113,20 @@ sub simple_go_search {
 			  -value=>'Search');
 
     $output .= "</p>\n";
-    $output .= $q->p("Search the database to display mimicry candidates.");
-    $output .= $q->p("Or try an example: <a href=\"$myurl?rm=output_hit_table&goterm=GO:0002376\">GO:0002376</a>, <a href=\"$myurl?rm=output_hit_table&goterm=GO:immune\">GO:immune</a>, <a href=\"$myurl?rm=output_hit_table&goterm=SPARC\">SPARC</a>, <a href=\"$myurl?rm=output_hit_table&goterm=Q8NBI4\">Q8NBI4</a>, <a href=\"$myurl?rm=output_hit_table&goterm=cytokine%20species:Homo%20sapiens\">cytokine species\:<i>Homo sapiens</i></a>, <a href=\"$myurl?rm=output_hit_table&goterm=cgd4_3550\">cgd4_3550</a>.");
-    # GO:0000502
-    $output .= $q->p("<ul><li>Use keywords prefixed by <b>GO:</b> to query the full <a target=go href=\"http://www.geneontology.org\">GO</a> tree and not only annotated leaf terms. <li>Use the <b>species:</b> prefix to restrict the species.</ul>");
-    $output .= $q->p("By Philipp Ludin, <a href=\"mailto:daniel.nilsson\@izb.unibe.ch\">Daniel Nilsson</a> and Pascal M&auml;ser.");
-    $output .= "</center>";
-
     $output .= $q->end_form();
+
+    $output .= "</div>";
+
+    $output .= "<div id=\"instruction\">";
+    $output .= $q->p("Search the database to display mimicry candidates. You can use gene names from host or parasite species, GO terms, keywords from GO term leaf names or keywords found in gene descriptions. The prefixes <i>GO:</i> and <i>species:</i> modify the use of prefixed search terms. Use keywords prefixed by <b>GO:</b> to query the full <a target=go href=\"http://www.geneontology.org\">GO</a> tree and not only annotated leaf terms, as in <a href=\"$myurl?rm=output_hit_table&goterm=GO:0002376\">GO:0002376</a> or <a href=\"$myurl?rm=output_hit_table&goterm=GO:immune\">GO:immune</a>. Use the <b>species:</b> prefix to restrict the species, as in <a href=\"$myurl?rm=output_hit_table&goterm=cytokine%20species:Homo%20sapiens\">cytokine species:<i>Homo sapiens</i></a>.");
+    # GO:0000502
+
+    $output .= $q->p("Or try an example: <a href=\"$myurl?rm=output_hit_table&goterm=GO:0002376\">GO:0002376</a>, <a href=\"$myurl?rm=output_hit_table&goterm=GO:immune\">GO:immune</a>, <a href=\"$myurl?rm=output_hit_table&goterm=SPARC\">SPARC</a>, <a href=\"$myurl?rm=output_hit_table&goterm=P08887\">P08887</a>, <a href=\"$myurl?rm=output_hit_table&goterm=cytokine%20species:Homo%20sapiens\">cytokine species\:<i>Homo sapiens</i></a>, <a href=\"$myurl?rm=output_hit_table&goterm=A2EXB5\">A2EXB5</a>.");
+    
+    $output .= "</div>";
+    $output .= $q->p("<center>By Philipp Ludin, <a href=\"mailto:daniel.nilsson\@izb.unibe.ch\">Daniel Nilsson</a> and Pascal M&auml;ser.</center>");
+    $output .= "</div>";
+
     $output .= $q->end_html();
 
     return $output;
@@ -148,16 +159,19 @@ sub output_hit_table {
 			 9 => "<a href=\"$myurl?rm=show_hit_details&name=linkPLACEholder\">linkPLACEholder</a><br><a class=\"linkout\" href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?db=gene&cmd=search&term=linkPLACEholder\">NCBI</a>");
     
     my $sth;
-    $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - alpha version</SPAN></p>";
+    $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - version $version</SPAN></p>";
 
     my $select_species_statement = "";
+    my @select_species_vars = ();
     my $query_genus = "";
     my $query_species = "";
     
-    if ( $goterm =~ /species:(\S+)\s+(\S+)/ ) { # unsafe
+    if ( $goterm =~ /species:(\S+)\s+(\S+)/ ) {
 	$query_genus = $1;
 	$query_species = $2;
-	$select_species_statement .= "AND ((species.genus='$query_genus' AND species.species='$query_species') OR (subject_species.genus='$query_genus' AND subject_species.species='$query_species'))";
+	# for safety reasons, pass all web tainted variables as "?" placeholder attributes
+	$select_species_statement .= "AND ((species.genus=? AND species.species=?) OR (subject_species.genus=? AND subject_species.species=?))";
+	@select_species_vars = ( $query_genus, $query_species, $query_genus, $query_species ) ;
 	$goterm =~ s/species:\S+\s+\S+//;
     }
     
@@ -167,22 +181,32 @@ sub output_hit_table {
     }
     $output .="</p>\n";
     if ( $goterm =~ /GO:\d+/ ) {
-
+	
+	# for safety reasons, pass all web tainted variables as "?" placeholder attributes
 	$sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mimic_sequence.name AS subject_acc, concat(subject_species.genus,' ', subject_species.species) AS host_species, mimic_sequence.description AS subject_desc, term.acc, term.name, term.term_type, mimic_hit.subject_start,mimic_hit.subject_end, query_mimic_sequence.name AS query_name, concat(species.genus,\" \", species.species) AS parasite_species, query_mimic_sequence.description as query_desc, mimic_hit.query_start, mimic_hit.query_end, mimic_hit.identities, mimic_hit.score, ROUND(mimic_hit_entropy.subject_H,2), ROUND(mimic_hit_entropy.query_H,2) FROM term INNER JOIN graph_path ON (term.id=graph_path.term1_id) INNER JOIN association ON (graph_path.term2_id=association.term_id) INNER JOIN gene_product ON (association.gene_product_id=gene_product.id) INNER JOIN mimic_sequence_with_go_association ON (mimic_sequence_with_go_association.gene_product_id = gene_product.id) INNER JOIN mimic_hit ON (mimic_sequence_with_go_association.mimic_sequence_id=mimic_hit.subject_id) INNER JOIN mimic_hit_entropy ON (mimic_hit_entropy.mimic_hit_id=mimic_hit.id) INNER JOIN mimic_sequence ON (mimic_sequence.id=mimic_sequence_with_go_association.mimic_sequence_id) INNER JOIN mimic_sequence AS query_mimic_sequence ON (query_mimic_sequence.id = mimic_hit.query_id) INNER join species ON (species.id = query_mimic_sequence.species_id) INNER JOIN species AS subject_species ON (subject_species.id = mimic_sequence.species_id) WHERE (term.acc=? AND association.is_not=0) $select_species_statement ORDER BY subject_symbol, query_name, identities DESC, score DESC, query_start, subject_start,name");
+	$sth->execute($goterm, @select_species_vars);
 
     } elsif ( $goterm =~ /GO:/ ) {
 	$goterm=~s/GO://;
 
-$sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mimic_sequence.name AS subject_acc, concat(subject_species.genus,' ', subject_species.species) AS host_species, mimic_sequence.description AS subject_desc, term.acc, term.name, term.term_type, mimic_hit.subject_start,mimic_hit.subject_end, query_mimic_sequence.name AS query_name, concat(species.genus,' ', species.species) AS parasite_species, query_mimic_sequence.description as query_desc, mimic_hit.query_start, mimic_hit.query_end, mimic_hit.identities, mimic_hit.score, ROUND(mimic_hit_entropy.subject_H,2), ROUND(mimic_hit_entropy.query_H,2) FROM term INNER JOIN graph_path ON (term.id=graph_path.term1_id) INNER JOIN association ON (graph_path.term2_id=association.term_id) INNER JOIN gene_product ON (association.gene_product_id=gene_product.id) INNER JOIN mimic_sequence_with_go_association ON (mimic_sequence_with_go_association.gene_product_id = gene_product.id) INNER JOIN mimic_hit ON (mimic_sequence_with_go_association.mimic_sequence_id=mimic_hit.subject_id) INNER JOIN mimic_hit_entropy ON (mimic_hit_entropy.mimic_hit_id=mimic_hit.id) INNER JOIN mimic_sequence ON (mimic_sequence.id=mimic_sequence_with_go_association.mimic_sequence_id) INNER JOIN mimic_sequence AS query_mimic_sequence ON (query_mimic_sequence.id = mimic_hit.query_id) INNER join species ON (species.id = query_mimic_sequence.species_id) INNER JOIN species AS subject_species ON (subject_species.id = mimic_sequence.species_id) WHERE (MATCH(term.name) AGAINST (?) AND association.is_not=0) $select_species_statement ORDER BY subject_symbol, query_name, identities DESC, score DESC, query_start, subject_start,name");
+	# for safety reasons, pass all web tainted variables as "?" placeholder attributes
+	$sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mimic_sequence.name AS subject_acc, concat(subject_species.genus,' ', subject_species.species) AS host_species, mimic_sequence.description AS subject_desc, term.acc, term.name, term.term_type, mimic_hit.subject_start,mimic_hit.subject_end, query_mimic_sequence.name AS query_name, concat(species.genus,' ', species.species) AS parasite_species, query_mimic_sequence.description as query_desc, mimic_hit.query_start, mimic_hit.query_end, mimic_hit.identities, mimic_hit.score, ROUND(mimic_hit_entropy.subject_H,2), ROUND(mimic_hit_entropy.query_H,2) FROM term INNER JOIN graph_path ON (term.id=graph_path.term1_id) INNER JOIN association ON (graph_path.term2_id=association.term_id) INNER JOIN gene_product ON (association.gene_product_id=gene_product.id) INNER JOIN mimic_sequence_with_go_association ON (mimic_sequence_with_go_association.gene_product_id = gene_product.id) INNER JOIN mimic_hit ON (mimic_sequence_with_go_association.mimic_sequence_id=mimic_hit.subject_id) INNER JOIN mimic_hit_entropy ON (mimic_hit_entropy.mimic_hit_id=mimic_hit.id) INNER JOIN mimic_sequence ON (mimic_sequence.id=mimic_sequence_with_go_association.mimic_sequence_id) INNER JOIN mimic_sequence AS query_mimic_sequence ON (query_mimic_sequence.id = mimic_hit.query_id) INNER join species ON (species.id = query_mimic_sequence.species_id) INNER JOIN species AS subject_species ON (subject_species.id = mimic_sequence.species_id) WHERE (MATCH(term.name) AGAINST (?) AND association.is_not=0) $select_species_statement ORDER BY subject_symbol, query_name, identities DESC, score DESC, query_start, subject_start,name");
+	$sth->execute($goterm, @select_species_vars);
 
-    } else {
+    } elsif ( $goterm ne "" ) {
 	# only including direct annotations to the term, not hits against children..
-	$sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mimic_sequence.name AS subject_acc, concat(subject_species.genus,' ', subject_species.species) AS host_species, mimic_sequence.description AS subject_desc, term.acc, term.name, term.term_type, mimic_hit.subject_start,mimic_hit.subject_end, query_mimic_sequence.name AS query_name, concat(species.genus,' ', species.species) AS parasite_species, query_mimic_sequence.description as query_desc, mimic_hit.query_start, mimic_hit.query_end, mimic_hit.identities, mimic_hit.score, ROUND(mimic_hit_entropy.subject_H,2), ROUND(mimic_hit_entropy.query_H,2) FROM mimic_hit LEFT OUTER JOIN mimic_sequence ON (mimic_sequence.id=mimic_hit.subject_id) LEFT OUTER JOIN mimic_sequence AS query_mimic_sequence ON (query_mimic_sequence.id = mimic_hit.query_id) INNER join species ON (species.id = query_mimic_sequence.species_id) INNER JOIN species AS subject_species ON (subject_species.id = mimic_sequence.species_id) INNER JOIN mimic_hit_entropy ON (mimic_hit_entropy.mimic_hit_id=mimic_hit.id) LEFT OUTER JOIN mimic_sequence_with_go_association ON (mimic_sequence_with_go_association.mimic_sequence_id=mimic_hit.subject_id) LEFT OUTER JOIN gene_product ON (mimic_sequence_with_go_association.gene_product_id = gene_product.id) LEFT OUTER JOIN association ON (association.gene_product_id=gene_product.id) LEFT OUTER JOIN term ON (term.id=association.term_id) WHERE (MATCH(term.name) AGAINST (?) OR MATCH(mimic_sequence.description) AGAINST ('$goterm') OR MATCH(mimic_sequence.name) AGAINST ('$goterm') OR MATCH(gene_product.symbol, gene_product.full_name) AGAINST ('$goterm') OR MATCH (query_mimic_sequence.description) AGAINST ('$goterm') OR MATCH(query_mimic_sequence.name) AGAINST ('+$goterm' IN BOOLEAN MODE)) $select_species_statement ORDER BY subject_symbol, query_name, identities DESC, score DESC, query_start, subject_start,name"); 
-# unsafe! goterm occurs multiple times..
+
+	# for safety reasons, pass all web tainted variables as "?" placeholder attributes
+	$sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mimic_sequence.name AS subject_acc, concat(subject_species.genus,' ', subject_species.species) AS host_species, mimic_sequence.description AS subject_desc, term.acc, term.name, term.term_type, mimic_hit.subject_start,mimic_hit.subject_end, query_mimic_sequence.name AS query_name, concat(species.genus,' ', species.species) AS parasite_species, query_mimic_sequence.description as query_desc, mimic_hit.query_start, mimic_hit.query_end, mimic_hit.identities, mimic_hit.score, ROUND(mimic_hit_entropy.subject_H,2), ROUND(mimic_hit_entropy.query_H,2) FROM mimic_hit LEFT OUTER JOIN mimic_sequence ON (mimic_sequence.id=mimic_hit.subject_id) LEFT OUTER JOIN mimic_sequence AS query_mimic_sequence ON (query_mimic_sequence.id = mimic_hit.query_id) INNER join species ON (species.id = query_mimic_sequence.species_id) INNER JOIN species AS subject_species ON (subject_species.id = mimic_sequence.species_id) INNER JOIN mimic_hit_entropy ON (mimic_hit_entropy.mimic_hit_id=mimic_hit.id) LEFT OUTER JOIN mimic_sequence_with_go_association ON (mimic_sequence_with_go_association.mimic_sequence_id=mimic_hit.subject_id) LEFT OUTER JOIN gene_product ON (mimic_sequence_with_go_association.gene_product_id = gene_product.id) LEFT OUTER JOIN association ON (association.gene_product_id=gene_product.id) LEFT OUTER JOIN term ON (term.id=association.term_id) WHERE (MATCH(term.name) AGAINST (?) OR MATCH(mimic_sequence.description) AGAINST (?) OR MATCH(mimic_sequence.name) AGAINST (?) OR MATCH(gene_product.symbol, gene_product.full_name) AGAINST (?) OR MATCH (query_mimic_sequence.description) AGAINST (?) OR MATCH(query_mimic_sequence.name) AGAINST (? IN BOOLEAN MODE)) $select_species_statement ORDER BY subject_symbol, query_name, identities DESC, score DESC, query_start, subject_start,name"); 
+
+	$plusgoterm="+$goterm";
+	$sth->execute($goterm, $goterm, $goterm, $goterm, $goterm, $plusgoterm, @select_species_vars);
+    } else { 
+	# no search term, except perhaps a species designation. Show all.
+	$sth = $dbh->prepare("SELECT DISTINCT gene_product.symbol AS subject_symbol, mimic_sequence.name AS subject_acc, concat(subject_species.genus,' ', subject_species.species) AS host_species, mimic_sequence.description AS subject_desc, term.acc, term.name, term.term_type, mimic_hit.subject_start,mimic_hit.subject_end, query_mimic_sequence.name AS query_name, concat(species.genus,' ', species.species) AS parasite_species, query_mimic_sequence.description as query_desc, mimic_hit.query_start, mimic_hit.query_end, mimic_hit.identities, mimic_hit.score, ROUND(mimic_hit_entropy.subject_H,2), ROUND(mimic_hit_entropy.query_H,2) FROM mimic_hit LEFT OUTER JOIN mimic_sequence ON (mimic_sequence.id=mimic_hit.subject_id) LEFT OUTER JOIN mimic_sequence AS query_mimic_sequence ON (query_mimic_sequence.id = mimic_hit.query_id) INNER join species ON (species.id = query_mimic_sequence.species_id) INNER JOIN species AS subject_species ON (subject_species.id = mimic_sequence.species_id) INNER JOIN mimic_hit_entropy ON (mimic_hit_entropy.mimic_hit_id=mimic_hit.id) LEFT OUTER JOIN mimic_sequence_with_go_association ON (mimic_sequence_with_go_association.mimic_sequence_id=mimic_hit.subject_id) LEFT OUTER JOIN gene_product ON (mimic_sequence_with_go_association.gene_product_id = gene_product.id) LEFT OUTER JOIN association ON (association.gene_product_id=gene_product.id) LEFT OUTER JOIN term ON (term.id=association.term_id) WHERE mimic_sequence.name LIKE '%' $select_species_statement ORDER BY subject_symbol, query_name, identities DESC, score DESC, query_start, subject_start,name");
+	$sth->execute(@select_species_vars);
     }
 
-    $sth->execute($goterm);
-    
     #header
     @header = ("Host symbol","Host acc", "Host species","Host protein description", "GO accession","GO term", "GO type", "Host start", "Host end", "Parasite name", "Parasite species", "Parasite protein description", "P start", "P end", "Ids", "Score","H H", "P H");
     my @answer = $sth->fetchrow_array();
@@ -253,7 +277,7 @@ sub show_hit_details {
     my $output .= $q->start_html(-title => "mimicDB - details: ".$queryname,
 				 -head => $q->Link({-rel=>'stylesheet',-type=>'text/css',-href=>$mycss,-media=>'screen'}));
     
-    $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - alpha version</SPAN></p>";
+    $output .= "<p><a style=\"text-decoration: none\" href=\"$myurl\"><SPAN class=\"mi\">mi</SPAN><SPAN class=\"micDB\">mi</SPAN><SPAN class=\"micDB\">cDB</SPAN></a><SPAN class=\"version\"> - version $version</SPAN></p>";
     
     # Sequence details
 
@@ -380,8 +404,8 @@ sub show_hit_details {
 	    next;
 	}
 
-	$sth = $dbh->prepare("select name,concat(species.genus,\" \", species.species) AS species, description, seq_len, seq from mimic_sequence_seq inner join mimic_sequence on (mimic_sequence_seq.mimic_sequence_id=mimic_sequence.id) inner join species on (mimic_sequence.species_id=species.id) where mimic_sequence.name='$hitname';");
-	$sth->execute();
+	$sth = $dbh->prepare("select name,concat(species.genus,\" \", species.species) AS species, description, seq_len, seq from mimic_sequence_seq inner join mimic_sequence on (mimic_sequence_seq.mimic_sequence_id=mimic_sequence.id) inner join species on (mimic_sequence.species_id=species.id) where mimic_sequence.name=?;");
+	$sth->execute($hitname);
 	@answer = $sth->fetchrow_array();
 	$hitseq = $answer[scalar(@answer)-1];
 	
@@ -400,8 +424,8 @@ sub show_hit_details {
 #	$postpone_output .= $self->_linebreak(\$hitseq, 60,"<br>");      
 #	$postpone_output .="</span>";
        	
-	$sth = $dbh->prepare("select name,identifier,mimic_sequence_motif.description,seq_start,seq_end,score,eval,type from mimic_sequence_motif inner join mimic_sequence on (mimic_sequence_motif.mimic_sequence_id=mimic_sequence.id) where mimic_sequence.name='$hitname';");
-	$sth->execute();
+	$sth = $dbh->prepare("select name,identifier,mimic_sequence_motif.description,seq_start,seq_end,score,eval,type from mimic_sequence_motif inner join mimic_sequence on (mimic_sequence_motif.mimic_sequence_id=mimic_sequence.id) where mimic_sequence.name=?;");
+	$sth->execute($hitname);
 	
 	$more_postponed_output="";
 	$more_postponed_output .= "<h4>Hit sequence motifs</h4><table>"; #start hit sequence motifs table
