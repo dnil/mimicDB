@@ -88,8 +88,6 @@ interest, or obtain readymade *-final-files for your species and place
 whereveryour $DATADIR points. In the readymade case, also obtain the
 original per species fasta files and also place these in the data dir.
 
-(Philipp, perhaps we should merge these packages?)
-
 =head2 hmmer
 
 Obtain hmmer L<http://hmmer.janelia.org/> and install a copy of the
@@ -160,18 +158,18 @@ browsing.
 
  cp interface/*pl interface/*pm /var/www/cgi-bin/
 
-The css schema file is set to go into a directory F<mimicDB> directly
+The css schema file is set to go into a directory directly
 in your document root. If this is not a good location for you, please
 update the C<$mycss> variable at the top of the MimicDB.pm module.
 
- mkdir /var/www/htdocs/mimicDB
- cp interface/*css /var/www/htdocs/mimicDB
+ mkdir /var/www/htdocs
+ cp interface/*css /var/www/htdocs/
 
 Edit at the top of MimicDB.pm to let the variable $myurl point to
 whatever your server needs, e.g.
 
  my $myurl = 'http://mimicDB.org/cgi-bin/mimicDB.pl';
- my $mycss = '/mimicDB/mimicDB.css';
+ my $mycss = '/mimicDB.css';
  my $mysqluser = 'mimicdb';
  my $mysqlpasswd = 'w3bbpublIC';
 
